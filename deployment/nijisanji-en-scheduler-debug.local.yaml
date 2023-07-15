@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nen-scheduler-debug-service
+  namespace: stream-montages
+  labels:
+    app: nen-scheduler
+spec:
+  type: NodePort
+  ports:
+  - port: 8080
+    nodePort: 30478
+  selector:
+    app: nen-scheduler

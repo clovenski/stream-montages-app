@@ -1,28 +1,32 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: montages-repo
+  name: nen-montage-jobs-scheduler
   namespace: stream-montages
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: montages-repo
+      app: nen-scheduler
   template:
     metadata:
       labels:
-        app: montages-repo
+        app: nen-scheduler
     spec:
       containers:
-      - name: montages-repo
-        image: jtengco-stream-montages-montages-repo:0.0.1
+      - name: nen-montage-jobs-scheduler
+        image: jtengco-stream-montages-nen-scheduler:0.0.1
+        imagePullPolicy: IfNotPresent
         envFrom:
         - secretRef:
-            name: postgres-cnx-secrets
+            name: nen-scheduler-aws-secrets
+        env:
+        - name: SM_JOBS_REPO_URL
+          value: http://jobs-repo-service:8080/montages/jobs
         resources:
           limits:
             cpu: "1"
-            memory: "256Mi"
+            memory: "128Mi"
           requests:
             cpu: "0.5"
 
@@ -31,11 +35,11 @@ spec:
 kind: Service
 apiVersion: v1
 metadata:
-  name: montages-repo-service
+  name: nen-scheduler-service
   namespace: stream-montages
 spec:
   selector:
-    app: montages-repo
+    app: nen-scheduler
   type: ClusterIP
   ports:
   - port: 8080
