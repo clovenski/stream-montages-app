@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: jobs-repo
+  name: montages-repo
   namespace: stream-montages
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: jobs-repo
+      app: montages-repo
   template:
     metadata:
       labels:
-        app: jobs-repo
+        app: montages-repo
     spec:
       containers:
-      - name: jobs-repo
-        image: jtengco-stream-montages-jobs-repo:0.0.1
+      - name: montages-repo
+        image: jtengco-stream-montages-montages-repo:0.0.1
         envFrom:
         - secretRef:
             name: postgres-cnx-secrets
@@ -31,11 +31,11 @@ spec:
 kind: Service
 apiVersion: v1
 metadata:
-  name: jobs-repo-service
+  name: montages-repo-service
   namespace: stream-montages
 spec:
   selector:
-    app: jobs-repo
+    app: montages-repo
   type:  ClusterIP
   ports:
   - port: 8080

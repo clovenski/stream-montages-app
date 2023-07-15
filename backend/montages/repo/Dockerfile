@@ -9,7 +9,7 @@ RUN go mod download
 
 COPY . ./
 
-RUN go build -o /app/out/jobs-repo-api.go
+RUN go build -o /app/out/montages-repo-api.go
 
 FROM golang:1-alpine
 
@@ -17,4 +17,4 @@ COPY --from=build /app/out /app
 
 EXPOSE 8080
 
-CMD ["/app/jobs-repo-api.go"]
+CMD ["/app/montages-repo-api.go"]
