@@ -15,7 +15,14 @@ var DB *gorm.DB
 
 func Connect(config *config.Config) {
 	var err error
-	cnxStr := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s", config.DBHost, config.DBUserName, config.DBUserPassword, config.DBName, config.DBPort)
+	cnxStr := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable search_path=%s",
+		config.DBHost,
+		config.DBUserName,
+		config.DBUserPassword,
+		config.DBName,
+		config.DBPort,
+		config.Schema,
+	)
 
 	DB, err = gorm.Open(postgres.Open(cnxStr), &gorm.Config{})
 	if err != nil {
@@ -25,6 +32,6 @@ func Connect(config *config.Config) {
 }
 
 func Migrate() {
-	DB.AutoMigrate(&models.MontageJobDefinition{})
+	DB.AutoMigrate(&models.MontageJob{})
 	log.Println("Successfully migrated database")
 }

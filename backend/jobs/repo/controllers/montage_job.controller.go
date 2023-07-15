@@ -13,11 +13,11 @@ import (
 )
 
 type MontageJobRepository interface {
-	Create(job models.MontageJob) models.MontageJob
+	Create(job models.MontageJob) (models.MontageJob, error)
 	Exists(id uuid.UUID) bool
 	Read(id uuid.UUID) models.MontageJob
 	ReadAll() []models.MontageJob
-	Update(job models.MontageJob) (models.MontageJob, bool)
+	Update(job models.MontageJob) (models.MontageJob, bool, error)
 	Delete(id uuid.UUID)
 }
 
@@ -39,7 +39,12 @@ func CreateMontageJob(w http.ResponseWriter, r *http.Request) {
 	var job models.MontageJob
 	json.NewDecoder(r.Body).Decode(&job)
 
-	savedJob := service.Create(job)
+	savedJob, err := service.Create(job)
+	if err != nil {
+		log.Printf("Failed to create job with id %v Error: %v\n", job.ID, err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
@@ -87,7 +92,12 @@ func UpdateMontageJobByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	updatedJob, inserted := service.Update(job)
+	updatedJob, inserted, err := service.Update(job)
+	if err != nil {
+		log.Printf("Failed to update job with id %v Error: %v\n", jobId, err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 

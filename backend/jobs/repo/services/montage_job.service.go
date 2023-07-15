@@ -1,8 +1,11 @@
 package services
 
 import (
+	"errors"
+
 	"github.com/clovenski/stream-montages-app/backend/jobs/repo/models"
 	"github.com/google/uuid"
+	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
 
@@ -10,9 +13,22 @@ type MontageJobService struct {
 	DBClient *gorm.DB
 }
 
-func (svc MontageJobService) Create(job models.MontageJob) models.MontageJob {
+func validateJobDefinition(def datatypes.JSONType[models.MontageJobDefinition]) error {
+	highlights := def.Data().Highlights
+	if len(highlights) == 0 {
+		return errors.New("Highlights must be non-empty")
+	}
+
+	return nil
+}
+
+func (svc MontageJobService) Create(job models.MontageJob) (models.MontageJob, error) {
 	if job.ID == uuid.Nil {
 		job.ID = uuid.New()
+	}
+
+	if err := validateJobDefinition(job.JobDefinition); err != nil {
+		return models.MontageJob{}, err
 	}
 
 	svc.DBClient.Create(&job)
@@ -21,7 +37,7 @@ func (svc MontageJobService) Create(job models.MontageJob) models.MontageJob {
 		// TODO: kafka publish
 	}()
 
-	return job
+	return job, nil
 }
 
 func (svc MontageJobService) Exists(id uuid.UUID) bool {
@@ -40,12 +56,17 @@ func (svc MontageJobService) ReadAll() (jobs []models.MontageJob) {
 	return
 }
 
-func (svc MontageJobService) Update(job models.MontageJob) (_ models.MontageJob, inserted bool) {
+func (svc MontageJobService) Update(job models.MontageJob) (_ models.MontageJob, inserted bool, err error) {
 	if !svc.Exists(job.ID) {
 		inserted = true
 	}
+
+	if err := validateJobDefinition(job.JobDefinition); err != nil {
+		return models.MontageJob{}, false, err
+	}
+
 	svc.DBClient.Save(job)
-	return job, inserted
+	return job, inserted, nil
 }
 
 func (svc MontageJobService) Delete(id uuid.UUID) {

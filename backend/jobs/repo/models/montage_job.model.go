@@ -14,11 +14,11 @@ type HighlightInfo struct {
 }
 
 type MontageJobDefinition struct {
-	Highlights []HighlightInfo
+	Highlights datatypes.JSONSlice[HighlightInfo]
 }
 
 type MontageJob struct {
-	ID            uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primary_key"`
+	ID            uuid.UUID `gorm:"type:uuid;primary_key"`
 	Name          string    `gorm:"type:varchar(255);not null"`
 	JobDefinition datatypes.JSONType[MontageJobDefinition]
 	CreatedAt     time.Time
