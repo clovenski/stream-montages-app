@@ -1,0 +1,221 @@
+{
+  "$schema": "https://www.krakend.io/schema/v3.json",
+  "version": 3,
+  "name": "Stream Montages App - API Gateway",
+  "timeout": "3000ms",
+  "cache_ttl": "300s",
+  "output_encoding": "json",
+  "debug_endpoint": true,
+  "endpoints": [
+    {
+      "endpoint": "/montages/jobs",
+      "method": "GET",
+      "output_encoding": "json",
+      "backend": [
+        {
+          "url_pattern": "/montages/jobs",
+          "encoding": "json",
+          "sd": "static",
+          "method": "GET",
+          "host": [
+            "http://jobs-repo-service:8080"
+          ],
+          "disable_host_sanitize": false,
+          "is_collection": true,
+          "target": "",
+          "group": "",
+          "mapping": {
+            "collection": "items"
+          }
+        }
+      ]
+    },
+    {
+      "endpoint": "/montages/jobs",
+      "method": "POST",
+      "output_encoding": "json",
+      "backend": [
+        {
+          "url_pattern": "/montages/jobs",
+          "encoding": "json",
+          "sd": "static",
+          "method": "POST",
+          "host": [
+            "http://jobs-repo-service:8080"
+          ],
+          "disable_host_sanitize": false
+        }
+      ]
+    },
+    {
+      "endpoint": "/montages/jobs/{id}",
+      "method": "GET",
+      "output_encoding": "json",
+      "backend": [
+        {
+          "url_pattern": "/montages/jobs/{id}",
+          "encoding": "json",
+          "sd": "static",
+          "method": "GET",
+          "host": [
+            "http://jobs-repo-service:8080"
+          ],
+          "disable_host_sanitize": false
+        }
+      ]
+    },
+    {
+      "endpoint": "/montages/jobs/{id}",
+      "method": "PUT",
+      "output_encoding": "json",
+      "backend": [
+        {
+          "url_pattern": "/montages/jobs/{id}",
+          "encoding": "json",
+          "sd": "static",
+          "method": "PUT",
+          "host": [
+            "http://jobs-repo-service:8080"
+          ],
+          "disable_host_sanitize": false
+        }
+      ]
+    },
+    {
+      "endpoint": "/montages/jobs/{id}",
+      "method": "DELETE",
+      "output_encoding": "string",
+      "backend": [
+        {
+          "url_pattern": "/montages/jobs/{id}",
+          "encoding": "string",
+          "sd": "static",
+          "method": "DELETE",
+          "host": [
+            "http://jobs-repo-service:8080"
+          ],
+          "disable_host_sanitize": false
+        }
+      ]
+    },
+    {
+      "endpoint": "/montages",
+      "method": "GET",
+      "output_encoding": "json",
+      "backend": [
+        {
+          "url_pattern": "/montages",
+          "encoding": "json",
+          "sd": "static",
+          "method": "GET",
+          "host": [
+            "http://montages-repo-service:8080"
+          ],
+          "disable_host_sanitize": false,
+          "is_collection": true,
+          "target": "",
+          "group": "",
+          "mapping": {
+            "collection": "items"
+          }
+        }
+      ]
+    },
+    {
+      "endpoint": "/montages",
+      "method": "POST",
+      "output_encoding": "json",
+      "backend": [
+        {
+          "url_pattern": "/montages",
+          "encoding": "json",
+          "sd": "static",
+          "method": "POST",
+          "host": [
+            "http://montages-repo-service:8080"
+          ],
+          "disable_host_sanitize": false
+        }
+      ]
+    },
+    {
+      "endpoint": "/montages/{id}",
+      "method": "GET",
+      "output_encoding": "json",
+      "backend": [
+        {
+          "url_pattern": "/montages/{id}",
+          "encoding": "json",
+          "sd": "static",
+          "method": "GET",
+          "host": [
+            "http://montages-repo-service:8080"
+          ],
+          "disable_host_sanitize": false
+        }
+      ]
+    },
+    {
+      "endpoint": "/montages/{id}",
+      "method": "PUT",
+      "output_encoding": "json",
+      "backend": [
+        {
+          "url_pattern": "/montages/{id}",
+          "encoding": "json",
+          "sd": "static",
+          "method": "PUT",
+          "host": [
+            "http://montages-repo-service:8080"
+          ],
+          "disable_host_sanitize": false
+        }
+      ]
+    },
+    {
+      "endpoint": "/montages/{id}",
+      "method": "DELETE",
+      "output_encoding": "string",
+      "backend": [
+        {
+          "url_pattern": "/montages/{id}",
+          "encoding": "string",
+          "sd": "static",
+          "method": "DELETE",
+          "host": [
+            "http://montages-repo-service:8080"
+          ],
+          "disable_host_sanitize": false
+        }
+      ]
+    },
+    {
+      "endpoint": "/schedule/nijisanji-en",
+      "method": "POST",
+      "output_encoding": "string",
+      "backend": [
+        {
+          "url_pattern": "/2015-03-31/functions/function/invocations",
+          "encoding": "string",
+          "sd": "static",
+          "method": "POST",
+          "host": [
+            "http://nen-scheduler-service:8080"
+          ],
+          "disable_host_sanitize": false
+        }
+      ],
+      "extra_config": {
+        "qos/ratelimit/router": {
+          "max_rate": 1,
+          "client_max_rate": 0,
+          "strategy": "ip",
+          "capacity": 0,
+          "client_capacity": 0
+        }
+      },
+      "timeout": "60s",
+      "cache_ttl": "0s"
+    }
+  ]
+}
