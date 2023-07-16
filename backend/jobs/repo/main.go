@@ -9,6 +9,7 @@ import (
 	"github.com/clovenski/stream-montages-app/backend/jobs/repo/controllers"
 	"github.com/clovenski/stream-montages-app/backend/jobs/repo/database"
 	"github.com/gorilla/mux"
+	kafka "github.com/segmentio/kafka-go"
 )
 
 func RegisterRoutes(router *mux.Router) {
@@ -30,7 +31,11 @@ func main() {
 
 	router := mux.NewRouter().StrictSlash(true)
 
-	controllers.InitController(database.DB, config)
+	controllers.InitController(database.DB, &kafka.Writer{
+		Addr:     kafka.TCP(config.BootstrapServer),
+		Topic:    config.JobsTopic,
+		Balancer: &kafka.LeastBytes{},
+	})
 	RegisterRoutes(router)
 
 	log.Println(fmt.Sprintf("Starting Server on port %s", config.ServerPort))
