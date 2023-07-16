@@ -33,7 +33,7 @@ metadata:
   name: jobs-executor
   namespace: stream-montages
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app: jobs-executor
@@ -48,7 +48,7 @@ spec:
             claimName: jobs-executor-pv-claim
       containers:
       - name: jobs-executor
-        image: jtengco/stream-montages-jobs-executor:0.0.2
+        image: jtengco/stream-montages-jobs-executor:0.0.4
         envFrom:
         - secretRef:
             name: jobs-executor-secrets
@@ -72,23 +72,23 @@ spec:
         volumeMounts:
         - mountPath: /app/data
           name: jobs-executor-pv
----
-apiVersion: autoscaling/v2
-kind: HorizontalPodAutoscaler
-metadata:
-  name: jobs-executor-hpa
-  namespace: stream-montages
-spec:
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: jobs-executor
-  minReplicas: 1
-  maxReplicas: 10
-  metrics:
-  - type: Resource
-    resource:
-      name: cpu
-      target:
-        type: Utilization
-        averageUtilization: 50
+# ---
+# apiVersion: autoscaling/v2
+# kind: HorizontalPodAutoscaler
+# metadata:
+#   name: jobs-executor-hpa
+#   namespace: stream-montages
+# spec:
+#   scaleTargetRef:
+#     apiVersion: apps/v1
+#     kind: Deployment
+#     name: jobs-executor
+#   minReplicas: 1
+#   maxReplicas: 10
+#   metrics:
+#   - type: Resource
+#     resource:
+#       name: cpu
+#       target:
+#         type: Utilization
+#         averageUtilization: 50
