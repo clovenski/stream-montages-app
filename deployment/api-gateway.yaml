@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: api-gateway
-        image: jtengco-stream-montages-api-gw:0.0.1
+        image: jtengco/stream-montages-api-gw:0.0.1
         ports:
         - containerPort: 8080
         command: [ "/usr/bin/krakend" ]

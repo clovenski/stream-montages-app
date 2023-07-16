@@ -48,7 +48,7 @@ spec:
             claimName: jobs-executor-pv-claim
       containers:
       - name: jobs-executor
-        image: jtengco-stream-montages-jobs-executor:0.0.1
+        image: jtengco/stream-montages-jobs-executor:0.0.1
         envFrom:
         - secretRef:
             name: jobs-executor-secrets

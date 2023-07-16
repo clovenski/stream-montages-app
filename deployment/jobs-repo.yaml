@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: jobs-repo
-        image: jtengco-stream-montages-jobs-repo:0.0.1
+        image: jtengco/stream-montages-jobs-repo:0.0.1
         envFrom:
         - secretRef:
             name: postgres-cnx-secrets
