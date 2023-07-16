@@ -48,7 +48,7 @@ spec:
             claimName: jobs-executor-pv-claim
       containers:
       - name: jobs-executor
-        image: jtengco/stream-montages-jobs-executor:0.0.1
+        image: jtengco/stream-montages-jobs-executor:0.0.2
         envFrom:
         - secretRef:
             name: jobs-executor-secrets
@@ -61,16 +61,14 @@ spec:
           value: stream-montage-jobs
         - name: SM_JOB_REPO_BASE_URL
           value: http://jobs-repo-service:8080
-        - name: SM_YOUTUBE_DL_EXE_PATH
-          value: /usr/local/bin/yt-dlp/yt-dlp_linux
         - name: SM_MONTAGE_OUTPUT_PATH_BASE
-          value: xxx
+          value: /app/data
         resources:
           limits:
-            cpu: "1"
-            memory: "256Mi"
+            cpu: "5"
+            memory: "1Gi"
           requests:
-            cpu: "0.5"
+            cpu: "1"
         volumeMounts:
         - mountPath: /app/data
           name: jobs-executor-pv
@@ -78,7 +76,7 @@ spec:
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: jobs-executor
+  name: jobs-executor-hpa
   namespace: stream-montages
 spec:
   scaleTargetRef:

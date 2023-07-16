@@ -5,6 +5,8 @@
         Task<GenerateClipResponse> GenerateClipAsync(GenerateClipRequest request);
 
         Task<ConcatenateClipsResponse> ConcatenateClipsAsync(ConcatenateClipsRequest request);
+
+        Task<GenerateAudioFileFromVideoResponse> GenerateAudioFileFromVideo(GenerateAudioFileFromVideoRequest request);
     }
 
     public class GenerateClipRequest
@@ -39,6 +41,16 @@
     }
 
     public class ConcatenateClipsResponse
+    {
+        public string OutputPath { get; set; }
+    }
+
+    public class GenerateAudioFileFromVideoRequest
+    {
+        public string SourcePath { get; set; }
+    }
+
+    public class GenerateAudioFileFromVideoResponse
     {
         public string OutputPath { get; set; }
     }

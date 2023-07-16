@@ -66,9 +66,15 @@ namespace MontageJobExecutor.Services
             }
 
             // subtitles
-            var transcription = await _videoTranscriber.TranscribeAsync(new()
+            // !! use audio file for transcription so less data to analyze (ex. size limit enforced by OpenAI)
+            var audioFileResult = await _clipService.GenerateAudioFileFromVideo(new()
             {
                 SourcePath = montagePath,
+            });
+            Console.WriteLine($"Successfully created audio file for montage at {montagePath} . Audio file written to {audioFileResult.OutputPath}");
+            var transcription = await _videoTranscriber.TranscribeAsync(new()
+            {
+                SourcePath = audioFileResult.OutputPath,
             });
             Console.WriteLine($"Successfully transcribed video {montagePath} . Transcription written to {transcription.OutputPath}");
 

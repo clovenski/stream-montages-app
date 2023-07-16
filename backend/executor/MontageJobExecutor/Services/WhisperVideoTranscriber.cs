@@ -24,11 +24,11 @@ namespace MontageJobExecutor.Services
             var result = await _openAIService.Audio.CreateTranscription(new()
             {
                 FileName       = fileName,
-                File           = File.ReadAllBytes(request.SourcePath),
+                FileStream     = File.OpenRead(request.SourcePath),
                 Model          = OpenAI.ObjectModels.Models.WhisperV1,
                 ResponseFormat = StaticValues.AudioStatics.ResponseFormat.Srt,
             });
-            if (!result.Successful)
+            if (!result.Successful || result.Error != null)
                 throw new Exception($"Failed to transcribe video at path {request.SourcePath} . Error: {result.Error}");
 
             Console.WriteLine($"Transcription for video at path {request.SourcePath} took {result.Duration} . Output at {outputPath}");

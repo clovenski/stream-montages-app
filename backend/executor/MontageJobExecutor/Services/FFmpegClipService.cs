@@ -31,5 +31,21 @@ namespace MontageJobExecutor.Services
                 OutputPath = request.OutputPath,
             };
         }
+
+        public async Task<GenerateAudioFileFromVideoResponse> GenerateAudioFileFromVideo(GenerateAudioFileFromVideoRequest request)
+        {
+            var outputPath = Path.Combine(
+                Path.GetDirectoryName(request.SourcePath) ?? "",
+                $"{Path.GetFileNameWithoutExtension(request.SourcePath)}.mp3"
+            );
+
+            var result = await FFmpeg.Conversions.New()
+                .Start($"-i {request.SourcePath} {outputPath} -y");
+
+            return new()
+            {
+                OutputPath = outputPath,
+            };
+        }
     }
 }

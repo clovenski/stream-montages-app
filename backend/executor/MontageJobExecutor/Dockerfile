@@ -26,12 +26,6 @@ RUN mkdir ffmpeg && cd ffmpeg && \
     cp -a ffmpeg-*/. . && \
     rm -rf ffmpeg-*
 
-# yt-dlp
-RUN mkdir yt-dlp && cd yt-dlp && \
-    wget https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_linux && \
-    # TODO: checksum?
-    chmod +rx yt-dlp_linux
-
 FROM mcr.microsoft.com/dotnet/runtime:6.0-alpine
 
 COPY --from=build-image /app/out /app/out
@@ -41,7 +35,9 @@ RUN apk update
 COPY --from=install-deps-image /app/deps /usr/local/bin
 
 RUN ln -s /usr/local/bin/ffmpeg/ffmpeg /usr/bin/ffmpeg && \
-    ln -s /usr/local/bin/ffmpeg/ffprobe /usr/bin/ffprobe && \
-    ln -s /usr/local/bin/yt-dlp/yt-dlp_linux /usr/bin/yt-dlp
+    ln -s /usr/local/bin/ffmpeg/ffprobe /usr/bin/ffprobe
+
+# yt-dlp
+RUN apk add --no-cache yt-dlp
 
 ENTRYPOINT [ "dotnet", "/app/out/MontageJobExecutor.dll" ]
