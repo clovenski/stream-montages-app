@@ -1,1 +1,2 @@
 *.exe
+deployment/kafka/02-broker.yaml
