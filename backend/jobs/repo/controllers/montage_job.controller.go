@@ -122,5 +122,5 @@ func DeleteMontageJobByID(w http.ResponseWriter, r *http.Request) {
 	}
 
 	service.Delete(jobId)
-	w.WriteHeader(http.StatusNoContent)
+	w.WriteHeader(http.StatusOK)
 }
