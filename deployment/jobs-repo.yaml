@@ -19,6 +19,13 @@ spec:
         envFrom:
         - secretRef:
             name: postgres-cnx-secrets
+        env:
+        - name: SM_KAFKA_BOOTSTRAP_SERVER
+          value: kafka-service.kafka.svc.cluster.local:9092
+        - name: SM_KAFKA_CLIENT_ID
+          value: stream-montages-app-job-repo
+        - name: SM_KAFKA_JOBS_TOPIC
+          value: stream-montage-jobs
         resources:
           limits:
             cpu: "1"

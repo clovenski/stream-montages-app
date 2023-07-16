@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/clovenski/stream-montages-app/backend/jobs/repo/config"
 	"github.com/clovenski/stream-montages-app/backend/jobs/repo/models"
 	"github.com/clovenski/stream-montages-app/backend/jobs/repo/services"
 	"github.com/google/uuid"
@@ -23,8 +24,8 @@ type MontageJobRepository interface {
 
 var service MontageJobRepository
 
-func InitController(client *gorm.DB) {
-	service = services.MontageJobService{DBClient: client}
+func InitController(client *gorm.DB, config config.Config) {
+	service = services.MontageJobService{DBClient: client, Config: config}
 }
 
 func GetMontageJobs(w http.ResponseWriter, r *http.Request) {

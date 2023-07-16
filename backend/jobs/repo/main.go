@@ -30,7 +30,7 @@ func main() {
 
 	router := mux.NewRouter().StrictSlash(true)
 
-	controllers.InitController(database.DB)
+	controllers.InitController(database.DB, config)
 	RegisterRoutes(router)
 
 	log.Println(fmt.Sprintf("Starting Server on port %s", config.ServerPort))

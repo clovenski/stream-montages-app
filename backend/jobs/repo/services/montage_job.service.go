@@ -1,16 +1,23 @@
 package services
 
 import (
+	"context"
+	"encoding/json"
 	"errors"
+	"log"
+	"time"
 
+	"github.com/clovenski/stream-montages-app/backend/jobs/repo/config"
 	"github.com/clovenski/stream-montages-app/backend/jobs/repo/models"
 	"github.com/google/uuid"
+	kafka "github.com/segmentio/kafka-go"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
 
 type MontageJobService struct {
 	DBClient *gorm.DB
+	Config   config.Config
 }
 
 func validateJobDefinition(def datatypes.JSONType[models.MontageJobDefinition]) error {
@@ -34,7 +41,34 @@ func (svc MontageJobService) Create(job models.MontageJob) (models.MontageJob, e
 	svc.DBClient.Create(&job)
 
 	go func() {
-		// TODO: kafka publish
+		// kafka publish
+		dialer := kafka.DefaultDialer
+		dialer.ClientID = svc.Config.ClientId
+		conn, err := dialer.DialLeader(context.Background(), "tcp", svc.Config.BootstrapServer, svc.Config.JobsTopic, 0)
+		if err != nil {
+			log.Printf("Job id=%s - Failed to dial leader: %v\n", job.ID, err)
+			return
+		}
+
+		jobJson, err := json.Marshal(job) // # may not be up to date with db (i.e. hidden manip to record after saving to db)
+		if err != nil {
+			log.Printf("Job id=%s - Failed to marshal record to json: %v\n", job.ID, err)
+			return
+		}
+
+		conn.SetWriteDeadline(time.Now().Add(10 * time.Second))
+		_, err = conn.Write(jobJson)
+		if err != nil {
+			log.Printf("Job id=%s - Failed to write messages: %v\n", job.ID, err)
+			return
+		}
+
+		log.Printf("Job id=%s - Successfully published to kafka topic %s\n", job.ID, svc.Config.JobsTopic)
+
+		if err := conn.Close(); err != nil {
+			log.Printf("Job id=%s - Failed to close writer: %v\n", job.ID, err)
+			return
+		}
 	}()
 
 	return job, nil
