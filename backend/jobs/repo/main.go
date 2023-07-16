@@ -32,9 +32,8 @@ func main() {
 	router := mux.NewRouter().StrictSlash(true)
 
 	controllers.InitController(database.DB, &kafka.Writer{
-		Addr:     kafka.TCP(config.BootstrapServer),
-		Topic:    config.JobsTopic,
-		Balancer: &kafka.LeastBytes{},
+		Addr:  kafka.TCP(config.BootstrapServer),
+		Topic: config.JobsTopic,
 	})
 	RegisterRoutes(router)
 

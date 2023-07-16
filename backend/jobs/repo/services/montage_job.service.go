@@ -46,7 +46,7 @@ func (svc MontageJobService) Create(job models.MontageJob) (models.MontageJob, e
 			return
 		}
 
-		if err := svc.KafkaWriter.WriteMessages(context.Background(), kafka.Message{Value: jobJson}); err != nil {
+		if err := svc.KafkaWriter.WriteMessages(context.Background(), kafka.Message{Key: []byte(job.ID.String()), Value: jobJson}); err != nil {
 			log.Printf("Job id=%s - Failed to publish to kafka: %v\n", job.ID, err)
 			return
 		}
