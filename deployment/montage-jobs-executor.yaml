@@ -1,0 +1,96 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: jobs-executor-pv
+  namespace: stream-montages
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 50Gi
+  accessModes:
+  - ReadWriteOnce
+  hostPath:
+    path: "/run/desktop/mnt/host/e/k8s/stream-montages" # docker desktop on Windows, adjust path accordingly
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: jobs-executor-pv-claim
+  namespace: stream-montages
+spec:
+  storageClassName: manual
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 50Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jobs-executor
+  namespace: stream-montages
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jobs-executor
+  template:
+    metadata:
+      labels:
+        app: jobs-executor
+    spec:
+      volumes:
+        - name: jobs-executor-pv
+          persistentVolumeClaim:
+            claimName: jobs-executor-pv-claim
+      containers:
+      - name: jobs-executor
+        image: jtengco-stream-montages-jobs-executor:0.0.1
+        envFrom:
+        - secretRef:
+            name: jobs-executor-secrets
+        env:
+        - name: SM_KAFKA_CONSUMER_BOOTSTRAP_SERVERS
+          value: kafka-service.kafka.svc.cluster.local:9092
+        - name: SM_KAFKA_CONSUMER_GROUP_ID
+          value: stream-montages-app-jobs-executor
+        - name: SM_KAFKA_TOPIC
+          value: stream-montage-jobs
+        - name: SM_JOB_REPO_BASE_URL
+          value: http://jobs-repo-service:8080
+        - name: SM_YOUTUBE_DL_EXE_PATH
+          value: /usr/local/bin/yt-dlp/yt-dlp_linux
+        - name: SM_MONTAGE_OUTPUT_PATH_BASE
+          value: xxx
+        resources:
+          limits:
+            cpu: "1"
+            memory: "256Mi"
+          requests:
+            cpu: "0.5"
+        volumeMounts:
+        - mountPath: /app/data
+          name: jobs-executor-pv
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: jobs-executor
+  namespace: stream-montages
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: jobs-executor
+  minReplicas: 1
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 50
