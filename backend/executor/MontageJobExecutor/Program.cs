@@ -52,31 +52,31 @@ try
         MontageJob? job = null;
         try
         {
-           // json parse to job dto
-           job = JsonSerializer.Deserialize<MontageJob>(message)
-               ?? throw new JsonException("Deserialization resulted in null");
+            // json parse to job dto
+            job = JsonSerializer.Deserialize<MontageJob>(message)
+                ?? throw new JsonException("Deserialization resulted in null");
 
-           // update the job to started status
-           job.Status = "STARTED";
-           job = (await jobRepo.UpdateMontageJobAsync(new() { Entity = job })).UpdatedEntity;
-           Console.WriteLine($"Successfully marked job {job.ID} as started.");
+            // update the job to started status
+            job.Status = "STARTED";
+            job = (await jobRepo.UpdateMontageJobAsync(new() { Entity = job })).UpdatedEntity;
+            Console.WriteLine($"Successfully marked job {job.ID} as started.");
 
-           var montageOutputPath = Path.Combine(
-               Environment.GetEnvironmentVariable(ENV_MONTAGE_OUTPUT_PATH_BASE)!,
-               $"{job.ID}"
-           );
-           Directory.CreateDirectory(montageOutputPath);
-           
-           var montage = await montageBuilder.Build(new()
-           {
-               Highlights     = job.JobDefinition.Highlights,
-               OutputPathBase = montageOutputPath,
-           });
-           Console.WriteLine($"Montage built, video at {montage.VideoPath} transcription at {montage.TranscriptionPath}");
+            var montageOutputPath = Path.Combine(
+                Environment.GetEnvironmentVariable(ENV_MONTAGE_OUTPUT_PATH_BASE)!,
+                $"{job.ID}"
+            );
+            Directory.CreateDirectory(montageOutputPath);
+            
+            var montage = await montageBuilder.Build(new()
+            {
+                Highlights     = job.JobDefinition.Highlights,
+                OutputPathBase = montageOutputPath,
+            });
+            Console.WriteLine($"Montage built, video at {montage.VideoPath} transcription at {montage.TranscriptionPath}");
 
-           // mark job as complete
-           job.Status = "COMPLETE";
-           await jobRepo.UpdateMontageJobAsync(new() { Entity = job });
+            // mark job as complete
+            job.Status = "COMPLETE";
+            await jobRepo.UpdateMontageJobAsync(new() { Entity = job });
         }
         catch (Exception ex)
         {
