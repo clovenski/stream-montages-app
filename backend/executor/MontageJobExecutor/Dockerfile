@@ -6,7 +6,7 @@ COPY . .
 
 RUN dotnet restore MontageJobExecutor.csproj
 RUN dotnet publish MontageJobExecutor.csproj \
-    -c Release -o out -r linux-x64 --sc
+    -c Release -o out -r linux-musl-x64 --sc
 
 # install dependencies
 FROM mcr.microsoft.com/dotnet/runtime:6.0-alpine AS install-deps-image
@@ -44,4 +44,4 @@ RUN ln -s /usr/local/bin/ffmpeg/ffmpeg /usr/bin/ffmpeg && \
     ln -s /usr/local/bin/ffmpeg/ffprobe /usr/bin/ffprobe && \
     ln -s /usr/local/bin/yt-dlp/yt-dlp_linux /usr/bin/yt-dlp
 
-CMD [ "/app/out" ]
+ENTRYPOINT [ "dotnet", "/app/out/MontageJobExecutor.dll" ]
