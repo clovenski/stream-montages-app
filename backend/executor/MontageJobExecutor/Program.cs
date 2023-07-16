@@ -41,6 +41,7 @@ try
 {
     while (true)
     {
+        Console.WriteLine($"Polling for new message...");
         var result = consumer.Consume();
         if (result.IsPartitionEOF || result.Message == null)
             continue;
