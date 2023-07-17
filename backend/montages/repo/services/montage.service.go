@@ -17,10 +17,10 @@ func validateMontageDetails(montage models.Montage) error {
 		return errors.New("Job ID must be filled")
 	}
 	if montage.Name == "" {
-		return errors.New("Job name must be filled")
+		return errors.New("Montage name must be filled")
 	}
-	if montage.Filename == "" {
-		return errors.New("Job name must be filled")
+	if montage.FilePath == "" {
+		return errors.New("File path must be filled")
 	}
 
 	return nil
