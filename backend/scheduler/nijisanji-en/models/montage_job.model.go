@@ -16,3 +16,9 @@ type MontageJobRequest struct {
 	Name          string
 	JobDefinition datatypes.JSONType[MontageJobDefinition]
 }
+
+type MontageJobResponse struct {
+	ID     string
+	Name   string
+	Status string
+}

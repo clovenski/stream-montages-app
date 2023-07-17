@@ -3,9 +3,11 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"math/rand"
+	"regexp"
 	"strings"
 	"time"
 
@@ -21,6 +23,34 @@ import (
 	"github.com/clovenski/stream-montages-app/backend/scheduler/nijisanji-en/services"
 )
 
+type RequestDetails struct {
+	StartFilter string `json:"startFilter"`
+	EndFilter   string `json:"endFilter"`
+}
+
+func isValidISODate(date string) bool {
+	re := regexp.MustCompile(`^[0-9]{4}-[0-9]{2}-[0-9]{2}$`)
+	return re.MatchString(date)
+}
+
+func parseRequest(request json.RawMessage) (startFilter, endFilter string, err error) {
+	var details RequestDetails
+	if err = json.Unmarshal(request, &details); err != nil {
+		return
+	}
+
+	if !isValidISODate(details.StartFilter) {
+		err = errors.New("Invalid start filter " + details.StartFilter)
+		return
+	}
+	if !isValidISODate(details.EndFilter) {
+		err = errors.New("Invalid end filter " + details.EndFilter)
+		return
+	}
+
+	return details.StartFilter, details.EndFilter, nil
+}
+
 func handler(ctx context.Context, event events.CloudWatchEvent) (string, error) {
 	// TODO: decompose this large function
 	config, err := config.LoadConfig()
@@ -33,15 +63,25 @@ func handler(ctx context.Context, event events.CloudWatchEvent) (string, error) 
 	}
 	mapper := services.MontageJobRequestMapper{}
 
-	// default 1 week window, can come from request details if needed
-	start := time.Now().AddDate(0, 0, -7)
-	startFilter := strings.Split(start.Local().String(), " ")[0] // only need the date part; local is OK as long as lambda runs in same timezone as db
-	today := strings.Split(time.Now().Local().String(), " ")[0]  // only need the date part
+	var startFilter, endFilter string
+	startFilter, endFilter, err = parseRequest(event.Detail)
+	if err != nil {
+		log.Printf("Failed to parse event details. Error: %v\n", err)
+
+		// default 1 week window, can come from request details if needed
+		start := time.Now().AddDate(0, 0, -7)
+		startFilter = strings.Split(start.Local().String(), " ")[0]    // only need the date part; local is OK as long as lambda runs in same timezone as db
+		endFilter = strings.Split(time.Now().Local().String(), " ")[0] // only need the date part
+	}
+
+	log.Printf("Scheduling montage jobs for streams from %s to %s\n", startFilter, endFilter)
 
 	dbClient := dynamodb.New(session.New())
 
 	channelIds := strings.Split(config.ChannelIds, " ")
 	topHighlights := make([]models.HighlightInfo, 0, len(channelIds))
+
+	scheduledJobIds := make([]string, 0, len(channelIds)+1)
 
 	for _, channelId := range channelIds {
 		log.Printf("Getting streamer info for channel id %s\n", channelId)
@@ -68,7 +108,7 @@ func handler(ctx context.Context, event events.CloudWatchEvent) (string, error) 
 		// get past highlights for this streamer
 		topHighlight := models.HighlightInfo{}
 		var allHighlights []models.HighlightInfo
-		var keyCondExp = "#PKey = :channelId AND #SKey > :startFilter"
+		var keyCondExp = "#PKey = :channelId AND #SKey BETWEEN :startFilter AND :endFilter"
 		var lastEvalKey map[string]*dynamodb.AttributeValue
 		var queryReq *dynamodb.QueryInput
 		var projExp = strings.Join([]string{config.HighlightsTableTopAttr, config.HighlightsTableVideoIdAttr}, ",")
@@ -85,6 +125,7 @@ func handler(ctx context.Context, event events.CloudWatchEvent) (string, error) 
 				ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
 					":channelId":   {S: &channelId},
 					":startFilter": {S: &startFilter},
+					":endFilter":   {S: &endFilter},
 				},
 			}
 			queryRes, err := dbClient.Query(queryReq)
@@ -132,14 +173,20 @@ func handler(ctx context.Context, event events.CloudWatchEvent) (string, error) 
 		}
 
 		// might be zero-value if no highlights found for this streamer
-		if topHighlight.Score != 0 {
-			topHighlights = append(topHighlights, topHighlight)
+		if topHighlight.Score == 0 {
+			continue
 		}
 
+		topHighlights = append(topHighlights, topHighlight)
+
 		// schedule for streamer montage
-		if err := scheduler.Schedule(mapper.Map(allHighlights, fmt.Sprintf("%s montage from %v to %v", streamerName, startFilter, today))); err != nil {
+		job, err := scheduler.Schedule(mapper.Map(allHighlights, fmt.Sprintf("%s montage from %v to %v", streamerName, startFilter, endFilter)))
+		if err != nil {
 			log.Printf("Failed to schedule streamer montage for channel id %s Error: %v\n", channelId, err)
+			continue
 		}
+
+		scheduledJobIds = append(scheduledJobIds, job.ID)
 	}
 
 	// randomize order so not same order of streamers every time
@@ -147,12 +194,14 @@ func handler(ctx context.Context, event events.CloudWatchEvent) (string, error) 
 	rand.Shuffle(len(topHighlights), func(i, j int) { topHighlights[i], topHighlights[j] = topHighlights[j], topHighlights[i] })
 
 	// schedule for all streamers montage
-	if err := scheduler.Schedule(mapper.Map(topHighlights, fmt.Sprintf("All streamer montage from %v to %v", startFilter, today))); err != nil {
+	job, err := scheduler.Schedule(mapper.Map(topHighlights, fmt.Sprintf("All streamer montage from %v to %v", startFilter, endFilter)))
+	if err != nil {
 		log.Printf("Failed to schedule all streamers montage. Error: %v\n", err)
+	} else {
+		scheduledJobIds = append(scheduledJobIds, job.ID)
 	}
 
-	// can return scheduled job ids
-	return "OK", nil
+	return strings.Join(scheduledJobIds, ","), nil
 }
 
 func main() {

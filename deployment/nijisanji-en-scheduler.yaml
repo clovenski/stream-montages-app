@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: nen-montage-jobs-scheduler
-        image: jtengco/stream-montages-nen-scheduler:0.0.1
+        image: jtengco/stream-montages-nen-scheduler:0.0.2
         imagePullPolicy: IfNotPresent
         envFrom:
         - secretRef:
