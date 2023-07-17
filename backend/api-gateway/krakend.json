@@ -10,34 +10,28 @@
     {
       "endpoint": "/montages/jobs",
       "method": "GET",
-      "output_encoding": "json",
+      "output_encoding": "no-op",
       "backend": [
         {
           "url_pattern": "/montages/jobs",
-          "encoding": "json",
+          "encoding": "no-op",
           "sd": "static",
           "method": "GET",
           "host": [
             "http://jobs-repo-service:8080"
           ],
-          "disable_host_sanitize": false,
-          "is_collection": true,
-          "target": "",
-          "group": "",
-          "mapping": {
-            "collection": "items"
-          }
+          "disable_host_sanitize": false
         }
       ]
     },
     {
       "endpoint": "/montages/jobs",
       "method": "POST",
-      "output_encoding": "json",
+      "output_encoding": "no-op",
       "backend": [
         {
           "url_pattern": "/montages/jobs",
-          "encoding": "json",
+          "encoding": "no-op",
           "sd": "static",
           "method": "POST",
           "host": [
@@ -50,11 +44,11 @@
     {
       "endpoint": "/montages/jobs/{id}",
       "method": "GET",
-      "output_encoding": "json",
+      "output_encoding": "no-op",
       "backend": [
         {
           "url_pattern": "/montages/jobs/{id}",
-          "encoding": "json",
+          "encoding": "no-op",
           "sd": "static",
           "method": "GET",
           "host": [
@@ -67,11 +61,11 @@
     {
       "endpoint": "/montages/jobs/{id}",
       "method": "PUT",
-      "output_encoding": "json",
+      "output_encoding": "no-op",
       "backend": [
         {
           "url_pattern": "/montages/jobs/{id}",
-          "encoding": "json",
+          "encoding": "no-op",
           "sd": "static",
           "method": "PUT",
           "host": [
@@ -84,11 +78,11 @@
     {
       "endpoint": "/montages/jobs/{id}",
       "method": "DELETE",
-      "output_encoding": "string",
+      "output_encoding": "no-op",
       "backend": [
         {
           "url_pattern": "/montages/jobs/{id}",
-          "encoding": "string",
+          "encoding": "no-op",
           "sd": "static",
           "method": "DELETE",
           "host": [
@@ -101,34 +95,28 @@
     {
       "endpoint": "/montages",
       "method": "GET",
-      "output_encoding": "json",
+      "output_encoding": "no-op",
       "backend": [
         {
           "url_pattern": "/montages",
-          "encoding": "json",
+          "encoding": "no-op",
           "sd": "static",
           "method": "GET",
           "host": [
             "http://montages-repo-service:8080"
           ],
-          "disable_host_sanitize": false,
-          "is_collection": true,
-          "target": "",
-          "group": "",
-          "mapping": {
-            "collection": "items"
-          }
+          "disable_host_sanitize": false
         }
       ]
     },
     {
       "endpoint": "/montages",
       "method": "POST",
-      "output_encoding": "json",
+      "output_encoding": "no-op",
       "backend": [
         {
           "url_pattern": "/montages",
-          "encoding": "json",
+          "encoding": "no-op",
           "sd": "static",
           "method": "POST",
           "host": [
@@ -141,11 +129,11 @@
     {
       "endpoint": "/montages/{id}",
       "method": "GET",
-      "output_encoding": "json",
+      "output_encoding": "no-op",
       "backend": [
         {
           "url_pattern": "/montages/{id}",
-          "encoding": "json",
+          "encoding": "no-op",
           "sd": "static",
           "method": "GET",
           "host": [
@@ -158,11 +146,11 @@
     {
       "endpoint": "/montages/{id}",
       "method": "PUT",
-      "output_encoding": "json",
+      "output_encoding": "no-op",
       "backend": [
         {
           "url_pattern": "/montages/{id}",
-          "encoding": "json",
+          "encoding": "no-op",
           "sd": "static",
           "method": "PUT",
           "host": [
@@ -175,11 +163,11 @@
     {
       "endpoint": "/montages/{id}",
       "method": "DELETE",
-      "output_encoding": "string",
+      "output_encoding": "no-op",
       "backend": [
         {
           "url_pattern": "/montages/{id}",
-          "encoding": "string",
+          "encoding": "no-op",
           "sd": "static",
           "method": "DELETE",
           "host": [
@@ -192,19 +180,7 @@
     {
       "endpoint": "/schedule/nijisanji-en",
       "method": "POST",
-      "output_encoding": "string",
-      "backend": [
-        {
-          "url_pattern": "/2015-03-31/functions/function/invocations",
-          "encoding": "string",
-          "sd": "static",
-          "method": "POST",
-          "host": [
-            "http://nen-scheduler-service:8080"
-          ],
-          "disable_host_sanitize": false
-        }
-      ],
+      "output_encoding": "no-op",
       "extra_config": {
         "qos/ratelimit/router": {
           "max_rate": 1,
@@ -214,8 +190,20 @@
           "client_capacity": 0
         }
       },
-      "timeout": "60s",
-      "cache_ttl": "0s"
+      "timeout": "20s",
+      "cache_ttl": "0s",
+      "backend": [
+        {
+          "url_pattern": "/2015-03-31/functions/function/invocations",
+          "encoding": "no-op",
+          "sd": "static",
+          "method": "POST",
+          "host": [
+            "http://nen-scheduler-service:8080"
+          ],
+          "disable_host_sanitize": false
+        }
+      ]
     }
   ]
 }
