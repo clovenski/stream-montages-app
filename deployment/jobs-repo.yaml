@@ -25,7 +25,7 @@ spec:
         - name: SM_KAFKA_CLIENT_ID
           value: stream-montages-app-job-repo
         - name: SM_KAFKA_JOBS_TOPIC
-          value: stream-montage-jobs
+          value: stream-montages-jobs
         resources:
           limits:
             cpu: "1"

@@ -40,7 +40,7 @@ spec:
         - name: KAFKA_ADVERTISED_LISTENERS
           value: PLAINTEXT://kafka-service.kafka.svc.cluster.local:9092
         - name : KAFKA_CREATE_TOPICS
-          value: stream-montage-jobs:10:1 # replications (last #) must be < # nodes in cluster
+          value: stream-montages-jobs:10:1 # replications (last #) must be < # nodes in cluster
         image: wurstmeister/kafka
         imagePullPolicy: IfNotPresent
         name: kafka-broker
