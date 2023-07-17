@@ -33,7 +33,7 @@ metadata:
   name: jobs-executor
   namespace: stream-montages
 spec:
-  replicas: 3
+  replicas: 10
   selector:
     matchLabels:
       app: jobs-executor
