@@ -61,6 +61,8 @@ spec:
           value: stream-montages-jobs
         - name: SM_JOB_REPO_BASE_URL
           value: http://jobs-repo-service:8080
+        - name: SM_MONTAGE_REPO_BASE_URL
+          value: http://montages-repo-service:8080
         - name: SM_MONTAGE_OUTPUT_PATH_BASE
           value: /app/data
         resources:

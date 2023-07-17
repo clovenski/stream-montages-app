@@ -9,6 +9,7 @@ const string ENV_KAFKA_CONSUMER_BOOTSTRAP_SERVERS = "SM_KAFKA_CONSUMER_BOOTSTRAP
 const string ENV_KAFKA_CONSUMER_GROUP_ID          = "SM_KAFKA_CONSUMER_GROUP_ID";
 const string ENV_KAFKA_TOPIC                      = "SM_KAFKA_TOPIC";
 const string ENV_JOB_REPO_BASE_URL                = "SM_JOB_REPO_BASE_URL";
+const string ENV_MONTAGE_REPO_BASE_URL            = "SM_MONTAGE_REPO_BASE_URL";
 const string ENV_YOUTUBE_DL_EXE_PATH              = "SM_YOUTUBE_DL_EXE_PATH";
 const string ENV_OPENAI_API_KEY                   = "SM_OPENAI_API_KEY";
 const string ENV_MONTAGE_OUTPUT_PATH_BASE         = "SM_MONTAGE_OUTPUT_PATH_BASE";
@@ -27,6 +28,7 @@ consumer.Subscribe(Environment.GetEnvironmentVariable(ENV_KAFKA_TOPIC));
 var httpClient = new HttpClient();
 
 var jobRepo                 = new MontageJobRepository(httpClient, Environment.GetEnvironmentVariable(ENV_JOB_REPO_BASE_URL)!);
+var montageRepo             = new MontageRepository(httpClient, Environment.GetEnvironmentVariable(ENV_MONTAGE_REPO_BASE_URL)!);
 var youtubeAVStreamProvider = new YouTubeAVStreamProvider(Environment.GetEnvironmentVariable(ENV_YOUTUBE_DL_EXE_PATH));
 var clipService             = new FFmpegClipService();
 var videoTranscriber        = new WhisperVideoTranscriber(new OpenAIService(new OpenAiOptions() { ApiKey = Environment.GetEnvironmentVariable(ENV_OPENAI_API_KEY)! }, httpClient));
@@ -74,6 +76,16 @@ try
                 OutputPathBase = montageOutputPath,
             });
             Console.WriteLine($"Montage built, video at {montage.VideoPath} transcription at {montage.TranscriptionPath}");
+
+            await montageRepo.CreateMontageAsync(new()
+            {
+                Entity = new()
+                {
+                    JobId    = job.ID,
+                    Name     = job.Name,
+                    FilePath = montage.VideoPath,
+                }
+            });
 
             // mark job as complete
             job.Status = "COMPLETE";
